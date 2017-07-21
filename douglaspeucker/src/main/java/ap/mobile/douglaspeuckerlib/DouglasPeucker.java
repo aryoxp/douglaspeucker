@@ -20,12 +20,17 @@ public class DouglasPeucker {
              ) {
             this.points.add(new LatLng(point.latitude, point.longitude));
         }
+
+        this.points = this.douglasPeucker(this.points);
+
         ArrayList<RouteBoxer.LatLng> simplifiedPoints = new ArrayList<>();
+        simplifiedPoints.add(this.points.get(0));
         for (LatLng point:
                 this.points) {
             if(point.isKeep())
                 simplifiedPoints.add(point);
         }
+        simplifiedPoints.add(this.points.get(this.points.size()-1));
         return simplifiedPoints;
 
     }
@@ -55,8 +60,8 @@ public class DouglasPeucker {
 
         if(maxDistance > distanceDeg) {
             points.get(maxIndex).keep();
-            douglasPeucker((ArrayList<LatLng>) points.subList(0, maxIndex));
-            douglasPeucker((ArrayList<LatLng>) points.subList(maxIndex, length-1));
+            douglasPeucker(new ArrayList<LatLng>(points.subList(0, maxIndex)));
+            douglasPeucker(new ArrayList<LatLng>(points.subList(maxIndex, length-1)));
         }
 
         return points;

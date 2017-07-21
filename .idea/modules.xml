@@ -4,8 +4,11 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/RouteBoxerDouglasPeucker.iml" filepath="$PROJECT_DIR$/RouteBoxerDouglasPeucker.iml" />
       <module fileurl="file://$PROJECT_DIR$/RouteBoxerDouglasPeucker.iml" filepath="$PROJECT_DIR$/RouteBoxerDouglasPeucker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RouteBoxerDouglasPeucker.iml" filepath="$PROJECT_DIR$/RouteBoxerDouglasPeucker.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/douglaspeucker/douglaspeucker.iml" filepath="$PROJECT_DIR$/douglaspeucker/douglaspeucker.iml" />
       <module fileurl="file://$PROJECT_DIR$/douglaspeucker/douglaspeucker.iml" filepath="$PROJECT_DIR$/douglaspeucker/douglaspeucker.iml" />
     </modules>
   </component>
