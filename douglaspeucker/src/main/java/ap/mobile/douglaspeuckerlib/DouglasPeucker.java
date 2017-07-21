@@ -10,29 +10,91 @@ import ap.mobile.routeboxerlib.RouteBoxer;
 public class DouglasPeucker {
 
     private ArrayList<LatLng> points = new ArrayList<>();
+    private double toleranceDistance = 200; // meter
+    private double deg = 111319.9;
 
-    public ArrayList<LatLng> simplify(ArrayList<RouteBoxer.LatLng> points) {
+    public ArrayList<RouteBoxer.LatLng> simplify(ArrayList<RouteBoxer.LatLng> points) {
 
-        
-
-        return this.points;
+        for (RouteBoxer.LatLng point:
+                points
+             ) {
+            this.points.add(new LatLng(point.latitude, point.longitude));
+        }
+        ArrayList<RouteBoxer.LatLng> simplifiedPoints = new ArrayList<>();
+        for (LatLng point:
+                this.points) {
+            if(point.isKeep())
+                simplifiedPoints.add(point);
+        }
+        return simplifiedPoints;
 
     }
 
+
+    public ArrayList<LatLng> douglasPeucker(ArrayList<LatLng> points) {
+
+
+        int length = points.size();
+
+        double maxDistance = 0;
+        int maxIndex = 0;
+        double distanceDeg = toleranceDistance / deg;
+
+        for(int i = 1; i < length - 2; i++) {
+
+            LatLng origin = points.get(0);
+            LatLng destination = points.get(length-1);
+
+            double pDistance = perpendicularDistance(points.get(i), origin, destination);
+            if(pDistance > maxDistance) {
+                maxDistance = pDistance;
+                maxIndex = i;
+            }
+
+        }
+
+        if(maxDistance > distanceDeg) {
+            points.get(maxIndex).keep();
+            douglasPeucker((ArrayList<LatLng>) points.subList(0, maxIndex));
+            douglasPeucker((ArrayList<LatLng>) points.subList(maxIndex, length-1));
+        }
+
+        return points;
+
+    }
+
+    public double perpendicularDistance(LatLng point, LatLng origin, LatLng destination) {
+
+        // (py – qy)x + (qx – px)y + (pxqy – qxpy) = 0
+
+        double a = origin.latitude - destination.latitude;
+        double b = destination.longitude - origin.longitude;
+        double c = (origin.longitude * destination.latitude)
+                - (destination.longitude * origin.latitude);
+
+        //d = |Am + Bn + C| / sqrt (A^2 + B^2);
+
+        double pDistance = Math.abs(a * point.longitude + b * point.latitude + c) /
+                (Math.sqrt(a * a + b * b));
+        return pDistance;
+
+    }
+
+
     public class LatLng extends RouteBoxer.LatLng {
 
-        private boolean isRemoved = false;
+        private boolean keep = false;
 
         public LatLng(double latitude, double longitude) {
             super(latitude, longitude);
         }
 
-        private void setRemoved() {
-            this.isRemoved = true;
+        private void keep() {
+            this.keep = true;
         }
 
-        public boolean isRemoved() {
-            return this.isRemoved;
+        private boolean isKeep() {
+            return this.keep;
         }
 
     }
