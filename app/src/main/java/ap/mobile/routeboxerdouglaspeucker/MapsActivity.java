@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import ap.mobile.douglaspeuckerlib.DouglasPeucker;
-import ap.mobile.routeboxerlib.RouteBoxer;
+import ap.mobile.douglaspeuckerlib.RouteBoxer;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMapLongClickListener, GoogleMap.OnInfoWindowClickListener, IMaps, RouteBoxerTask.IRouteBoxerTask {
 
@@ -46,6 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Polyline routePolyline, simplifiedPolyline;
     private ArrayList<Polygon> boxPolygons;
     private MaterialDialog routeBoxProcessDialog;
+    private Polyline line;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -232,7 +233,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         DouglasPeucker douglasPeucker = new DouglasPeucker();
         ArrayList<RouteBoxer.LatLng> simplifiedRoute = douglasPeucker.simplify(points);
 
-
         PolylineOptions simplifiedPolylineOptions = new PolylineOptions()
                 .color(Color.BLUE)
                 .width(8);
@@ -262,7 +262,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-
     @Override
     public void onRouteBoxerTaskComplete(ArrayList<RouteBoxer.Box> boxes) {
         this.draw(boxes, Color.GRAY, Color.argb(15, 255, 0, 0));
@@ -272,12 +271,59 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onRouteBoxerBoxPublished(ArrayList<RouteBoxer.Box> boxes, int step) {
-
+        switch (step) {
+            case 1:
+            case 2:
+            case 3:
+                this.draw(boxes, Color.GRAY, Color.TRANSPARENT);
+                break;
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+                this.draw(boxes, Color.DKGRAY, Color.TRANSPARENT);
+                break;
+            default:
+                this.draw(boxes, Color.GRAY, Color.argb(128, 255, 0, 0));
+                break;
+        }
     }
 
     @Override
     public void onMessage(String message) {
+        if(this.routeBoxProcessDialog != null && this.routeBoxProcessDialog.isShowing())
+            this.routeBoxProcessDialog.setContent(message);
+    }
 
+    @Override
+    public void drawLine(LatLng origin, LatLng destination, int color) {
+        PolylineOptions polylineOptions = new PolylineOptions()
+                .color(color)
+                .width(8).add(origin).add(destination);
+        this.line = this.mMap.addPolyline(polylineOptions);
+    }
+
+    @Override
+    public void drawBox(LatLng origin, LatLng destination, int color) {
+
+        LatLng nw = new LatLng(destination.latitude, origin.longitude);
+        LatLng se = new LatLng(origin.latitude, destination.longitude);
+        LatLng sw = new LatLng(origin.latitude, origin.longitude);
+        LatLng ne = new LatLng(destination.latitude, destination.longitude);
+        PolygonOptions polygonOptions = new PolygonOptions()
+                .add(sw, nw, ne, se, sw)
+                .strokeColor(color)
+                .strokeWidth(5)
+                .fillColor(color);
+        Polygon boxPolygon = mMap.addPolygon(polygonOptions);
+        this.boxPolygons.add(boxPolygon);
+    }
+
+    @Override
+    public void clearPolygon() {
+        for(Polygon polygon: this.boxPolygons)
+            polygon.remove();
+        this.boxPolygons.clear();
     }
 
     private void draw(ArrayList<RouteBoxer.Box> boxes, int color, int fillColor) {

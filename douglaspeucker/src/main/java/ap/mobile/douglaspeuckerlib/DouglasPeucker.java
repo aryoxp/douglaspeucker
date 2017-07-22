@@ -1,7 +1,6 @@
 package ap.mobile.douglaspeuckerlib;
 
 import java.util.ArrayList;
-import ap.mobile.routeboxerlib.RouteBoxer;
 
 /**
  * Created by Aryo on 21/07/2017.
@@ -15,9 +14,9 @@ public class DouglasPeucker {
 
     public ArrayList<RouteBoxer.LatLng> simplify(ArrayList<RouteBoxer.LatLng> points) {
 
-        for (RouteBoxer.LatLng point:
+        for (RouteBoxer.LatLng point :
                 points
-             ) {
+                ) {
             this.points.add(new LatLng(point.latitude, point.longitude));
         }
 
@@ -25,12 +24,12 @@ public class DouglasPeucker {
 
         ArrayList<RouteBoxer.LatLng> simplifiedPoints = new ArrayList<>();
         simplifiedPoints.add(this.points.get(0));
-        for (LatLng point:
+        for (LatLng point :
                 this.points) {
-            if(point.isKeep())
+            if (point.isKeep())
                 simplifiedPoints.add(point);
         }
-        simplifiedPoints.add(this.points.get(this.points.size()-1));
+        simplifiedPoints.add(this.points.get(this.points.size() - 1));
         return simplifiedPoints;
 
     }
@@ -45,23 +44,23 @@ public class DouglasPeucker {
         int maxIndex = 0;
         double distanceDeg = toleranceDistance / deg;
 
-        for(int i = 1; i < length - 2; i++) {
+        for (int i = 1; i < length - 2; i++) {
 
             LatLng origin = points.get(0);
-            LatLng destination = points.get(length-1);
+            LatLng destination = points.get(length - 1);
 
             double pDistance = perpendicularDistance(points.get(i), origin, destination);
-            if(pDistance > maxDistance) {
+            if (pDistance > maxDistance) {
                 maxDistance = pDistance;
                 maxIndex = i;
             }
 
         }
 
-        if(maxDistance > distanceDeg) {
+        if (maxDistance > distanceDeg) {
             points.get(maxIndex).keep();
-            douglasPeucker(new ArrayList<LatLng>(points.subList(0, maxIndex)));
-            douglasPeucker(new ArrayList<LatLng>(points.subList(maxIndex, length-1)));
+            douglasPeucker(new ArrayList<>(points.subList(0, maxIndex)));
+            douglasPeucker(new ArrayList<>(points.subList(maxIndex, length - 1)));
         }
 
         return points;
@@ -103,6 +102,4 @@ public class DouglasPeucker {
         }
 
     }
-
-
 }

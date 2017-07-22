@@ -30,7 +30,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-auth:11.0.2'
     compile 'com.google.android.gms:play-services-gcm:11.0.2'
     compile 'com.google.android.gms:play-services-maps:11.0.2'
-    compile 'ap.mobile.routeboxerlib:routeboxerlib:1.0.0@aar'
+    //compile 'ap.mobile.routeboxerlib:routeboxerlib:1.0.0@aar'
     compile 'com.afollestad.material-dialogs:core:0.9.4.5'
     compile 'com.afollestad.material-dialogs:commons:0.9.4.5'
     //testCompile 'junit:junit:4.12'
