@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">RouteBoxer Douglas-Peucker</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps">RouteBoxer Douglas-Peucker</string>
+    <string name="pref_title_internal_parameters">Internal Parameters</string>
+    <string name="pref_summary_tolerance_distance">Perpendicular distance tolerance from specified route</string>
+    <string name="pref_title_tolerance_distance">Perpendicular Distance Tolerance</string>
 </resources>

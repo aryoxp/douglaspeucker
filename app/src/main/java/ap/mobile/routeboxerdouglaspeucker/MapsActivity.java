@@ -1,15 +1,21 @@
 package ap.mobile.routeboxerdouglaspeucker;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -34,10 +40,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import ap.mobile.douglaspeuckerlib.DouglasPeucker;
-import ap.mobile.douglaspeuckerlib.RouteBoxer;
+import ap.mobile.routeboxerlib.RouteBoxer;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMapLongClickListener, GoogleMap.OnInfoWindowClickListener, IMaps, RouteBoxerTask.IRouteBoxerTask {
+public class MapsActivity extends AppCompatActivity implements
+        OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        GoogleMap.OnMapLongClickListener, GoogleMap.OnInfoWindowClickListener,
+        IMaps, RouteBoxerTask.IRouteBoxerTask {
 
+    private int toleranceDistance = 200;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private float defaultZoom = 13;
@@ -52,6 +63,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        PreferenceManager.setDefaultValues(this, R.xml.preference_main, false);
+        this.toleranceDistance = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("pref_key_tolerance_distance", "200"));
 
         // Create an instance of GoogleAPIClient.
         if (this.mGoogleApiClient == null) {
@@ -63,6 +76,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         setContentView(R.layout.activity_maps);
+        ActionBar actionBar = this.getSupportActionBar();
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.show();
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -80,6 +97,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStop();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch(item.getItemId()) {
+            case R.id.action_refresh:
+
+                if(this.destinationMarker != null)
+                    this.doRouteBoxer(this.destinationMarker);
+                else {
+                    //Toast.makeText(this, "Please mark your destination on map by long-pressing an area of your destination.", Toast.LENGTH_SHORT).show();
+                    MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
+                    builder.title("Destination Required")
+                            .content("Please mark your destination on the displayed map by long-pressing an area near your preferred destination.")
+                            .positiveText("OK")
+                            .build().show();
+                }
+
+                break;
+            case R.id.action_settings:
+                Intent settingsIntent = new Intent(this, RouteBoxerPreferenceActivity.class);
+                this.startActivity(settingsIntent);
+                break;
+        }
+
+        return true;
+    }
 
     /**
      * Manipulates the map once available.
@@ -189,7 +239,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        Toast.makeText(this, marker.getPosition().latitude + ", " + marker.getPosition().longitude, Toast.LENGTH_SHORT).show();
+        this.doRouteBoxer(marker);
+    }
+
+    private void doRouteBoxer(Marker marker) {
+        //Toast.makeText(this, marker.getPosition().latitude + ", " + marker.getPosition().longitude, Toast.LENGTH_SHORT).show();
         if(this.origin != null && this.destination != null) {
             //origin = new LatLng(38.595900, -89.985198);
             //destination = new LatLng(38.506360, -89.984318);
@@ -211,6 +265,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .show();
 
         }
+        marker.hideInfoWindow();
     }
 
     @Override
@@ -231,7 +286,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             points.add(new RouteBoxer.LatLng(point.latitude, point.longitude));
 
         DouglasPeucker douglasPeucker = new DouglasPeucker();
-        ArrayList<RouteBoxer.LatLng> simplifiedRoute = douglasPeucker.simplify(points);
+        this.toleranceDistance = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("pref_key_tolerance_distance", "200"));
+        ArrayList<RouteBoxer.LatLng> simplifiedRoute = douglasPeucker.simplify(points, this.toleranceDistance);
 
         PolylineOptions simplifiedPolylineOptions = new PolylineOptions()
                 .color(Color.BLUE)
@@ -256,7 +312,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         for(RouteBoxer.LatLng point: simplifiedRoute)
             sRoute.add(new LatLng(point.latitude, point.longitude));
 
-        RouteBoxerTask routeBoxerTask = new RouteBoxerTask(sRoute, 200, this);
+        RouteBoxerTask routeBoxerTask = new RouteBoxerTask(sRoute, this.toleranceDistance, this);
         routeBoxerTask.execute();
 
 
@@ -270,26 +326,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onRouteBoxerBoxPublished(ArrayList<RouteBoxer.Box> boxes, int step) {
-        switch (step) {
-            case 1:
-            case 2:
-            case 3:
-                this.draw(boxes, Color.GRAY, Color.TRANSPARENT);
-                break;
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-                this.draw(boxes, Color.DKGRAY, Color.TRANSPARENT);
-                break;
-            default:
-                this.draw(boxes, Color.GRAY, Color.argb(128, 255, 0, 0));
-                break;
-        }
-    }
-
-    @Override
     public void onMessage(String message) {
         if(this.routeBoxProcessDialog != null && this.routeBoxProcessDialog.isShowing())
             this.routeBoxProcessDialog.setContent(message);
@@ -297,6 +333,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void drawLine(LatLng origin, LatLng destination, int color) {
+        if(this.line != null)
+            this.line.remove();
         PolylineOptions polylineOptions = new PolylineOptions()
                 .color(color)
                 .width(8).add(origin).add(destination);
@@ -353,6 +391,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             this.boxPolygons.add(boxPolygon);
         }
 
-        return;
     }
 }

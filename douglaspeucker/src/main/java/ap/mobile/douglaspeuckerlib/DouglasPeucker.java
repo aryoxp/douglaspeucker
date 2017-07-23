@@ -2,23 +2,21 @@ package ap.mobile.douglaspeuckerlib;
 
 import java.util.ArrayList;
 
-/**
- * Created by Aryo on 21/07/2017.
- */
+import ap.mobile.routeboxerlib.RouteBoxer;
 
 public class DouglasPeucker {
 
     private ArrayList<LatLng> points = new ArrayList<>();
     private double toleranceDistance = 200; // meter
-    private double deg = 111319.9;
+    private static final double oneDegreeInMeter = 111319.9; // 1 degree in meter
 
-    public ArrayList<RouteBoxer.LatLng> simplify(ArrayList<RouteBoxer.LatLng> points) {
+    public ArrayList<RouteBoxer.LatLng> simplify(ArrayList<RouteBoxer.LatLng> points, int toleranceDistance) {
 
-        for (RouteBoxer.LatLng point :
-                points
-                ) {
+        if(toleranceDistance == 0) this.toleranceDistance = 200;
+        else this.toleranceDistance = toleranceDistance;
+
+        for (RouteBoxer.LatLng point : points)
             this.points.add(new LatLng(point.latitude, point.longitude));
-        }
 
         this.points = this.douglasPeucker(this.points);
 
@@ -35,14 +33,14 @@ public class DouglasPeucker {
     }
 
 
-    public ArrayList<LatLng> douglasPeucker(ArrayList<LatLng> points) {
+    private ArrayList<LatLng> douglasPeucker(ArrayList<LatLng> points) {
 
 
         int length = points.size();
 
         double maxDistance = 0;
         int maxIndex = 0;
-        double distanceDeg = toleranceDistance / deg;
+        double distanceDeg = toleranceDistance / DouglasPeucker.oneDegreeInMeter;
 
         for (int i = 1; i < length - 2; i++) {
 
@@ -67,7 +65,7 @@ public class DouglasPeucker {
 
     }
 
-    public double perpendicularDistance(LatLng point, LatLng origin, LatLng destination) {
+    private double perpendicularDistance(LatLng point, LatLng origin, LatLng destination) {
 
         // (py – qy)x + (qx – px)y + (pxqy – qxpy) = 0
 
@@ -78,9 +76,8 @@ public class DouglasPeucker {
 
         //d = |Am + Bn + C| / sqrt (A^2 + B^2);
 
-        double pDistance = Math.abs(a * point.longitude + b * point.latitude + c) /
+        return Math.abs(a * point.longitude + b * point.latitude + c) /
                 (Math.sqrt(a * a + b * b));
-        return pDistance;
 
     }
 
@@ -89,14 +86,13 @@ public class DouglasPeucker {
 
         private boolean keep = false;
 
-        public LatLng(double latitude, double longitude) {
+        private LatLng(double latitude, double longitude) {
             super(latitude, longitude);
         }
 
         private void keep() {
             this.keep = true;
         }
-
         private boolean isKeep() {
             return this.keep;
         }

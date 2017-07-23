@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/pref_title_internal_parameters"
+        android:key="pref_key_internal_parameters">
+        <EditTextPreference
+            android:key="pref_key_tolerance_distance"
+            android:summary="@string/pref_summary_tolerance_distance"
+            android:title="@string/pref_title_tolerance_distance"
+            android:inputType="number"
+            android:defaultValue="200" />
+    </PreferenceCategory>
+</PreferenceScreen>

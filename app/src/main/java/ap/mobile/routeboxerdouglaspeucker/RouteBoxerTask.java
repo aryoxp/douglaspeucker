@@ -6,7 +6,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
-import ap.mobile.douglaspeuckerlib.RouteBoxer;
+import ap.mobile.routeboxerlib.RouteBoxer;
 
 /**
  * Created by aryo on 30/1/16.
@@ -61,12 +61,14 @@ public class RouteBoxerTask extends AsyncTask<Void, RouteBoxerTask.RouterBoxerDa
                 return;
             }
 
+            if(data.type == DataType.Message) {
+                this.iRouteBoxerTask.onMessage(data.message);
+            }
+
             if(data.type == DataType.Result) {
 
                 String message = data.message;
                 ArrayList<RouteBoxer.Box> boxes = data.boxes;
-                if (boxes != null)
-                    this.iRouteBoxerTask.onRouteBoxerBoxPublished(boxes, this.step);
                 if (message != null)
                     this.iRouteBoxerTask.onMessage(message);
                 switch (this.step) {
@@ -86,7 +88,14 @@ public class RouteBoxerTask extends AsyncTask<Void, RouteBoxerTask.RouterBoxerDa
     public void onBoundsObtained(RouteBoxer.LatLngBounds bounds) {}
 
     @Override
-    public void onGridObtained(RouteBoxer.Box[][] boxArray, ArrayList<RouteBoxer.Box> boxes) {}
+    public void onGridOverlaid(ArrayList<RouteBoxer.Box> boxes) {
+
+    }
+
+    @Override
+    public void onGridObtained(RouteBoxer.Box[][] boxArray) {
+
+    }
 
     @Override
     public void onGridMarked(ArrayList<RouteBoxer.Box> boxes) {
@@ -95,9 +104,8 @@ public class RouteBoxerTask extends AsyncTask<Void, RouteBoxerTask.RouterBoxerDa
         //publishProgress(data);
     }
 
-
     @Override
-    public void onGridMarksExpanded(RouteBoxer.Box[][] boxArray, ArrayList<RouteBoxer.Box> boxes) {}
+    public void onGridMarksExpanded(RouteBoxer.Box[][] boxArray) {}
 
     @Override
     public void onMergedAdjointVertically(ArrayList<RouteBoxer.Box> boxes) {}
@@ -112,7 +120,10 @@ public class RouteBoxerTask extends AsyncTask<Void, RouteBoxerTask.RouterBoxerDa
     public void onMergedHorizontally(ArrayList<RouteBoxer.Box> mergedBoxes) {}
 
     @Override
-    public void onProcess(String processInfo, ArrayList<RouteBoxer.Box> boxes) {}
+    public void onProcess(String processInfo) {
+        RouterBoxerData data = new RouterBoxerData(processInfo);
+        this.publishProgress(data);
+    }
 
     @Override
     public void drawLine(RouteBoxer.LatLng origin, RouteBoxer.LatLng destination, int color) {
@@ -135,7 +146,6 @@ public class RouteBoxerTask extends AsyncTask<Void, RouteBoxerTask.RouterBoxerDa
     public interface IRouteBoxerTask {
 
         void onRouteBoxerTaskComplete(ArrayList<RouteBoxer.Box> boxes);
-        void onRouteBoxerBoxPublished(ArrayList<RouteBoxer.Box> boxes, int step);
         void onMessage(String message);
         void drawLine(LatLng origin, LatLng destination, int color);
         void drawBox(LatLng origin, LatLng destination, int color);
@@ -174,10 +184,15 @@ public class RouteBoxerTask extends AsyncTask<Void, RouteBoxerTask.RouterBoxerDa
         public RouterBoxerData(DataType clearPolygon) {
             this.type = clearPolygon;
         }
+
+        public RouterBoxerData(String processInfo) {
+            this.type = DataType.Message;
+            this.message = processInfo;
+        }
     }
 
     public enum DataType {
-        Box, Line, Result,
+        Message, Box, Line, Result,
         ClearPolygon;
     }
 }
