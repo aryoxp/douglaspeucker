@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
 
 android {
     compileSdkVersion 25
@@ -25,4 +27,84 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'ap.mobile.routeboxerlib:routeboxerlib:1.0.0@aar'
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+group = 'ap.mobile.douglaspeucker'
+version = '1.0.0'
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name 'RouteBoxer'
+            description 'An implementation library of Douglas-Peucker line simplification algorithm'
+            url 'https://github.com/aryoxp/douglaspeucker'
+            inceptionYear '2017'
+
+            packaging 'aar'
+            groupId 'ap.mobile.douglaspeucker'
+            artifactId 'douglaspeucker'
+            version '1.0.0'
+
+            licenses {
+                license {
+                    name 'The MIT License (MIT)'
+                    url 'https://opensource.org/licenses/MIT'
+                }
+            }
+            scm {
+                connection 'https://github.com/aryoxp/douglaspeucker.git'
+                url 'https://github.com/aryoxp/douglaspeucker'
+
+            }
+            developers {
+                developer {
+                    id = 'aryoxp'
+                    name 'Aryo'
+                }
+            }
+        }
+    }
+}
+
+Properties bintrayProperties = new Properties()
+bintrayProperties.load(project.rootProject.file('bintray.properties').newDataInputStream())
+
+bintray {
+    user = bintrayProperties.getProperty('user')
+    key = bintrayProperties.get('key')
+    configurations = ['archives']
+    pkg {
+        repo = 'DouglasPeucker'
+        name = 'DouglasPeucker'
+        userOrg = 'aryoxp'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/aryoxp/douglaspeucker.git'
+        publish = true
+        version {
+            name = 'v1.0.0'
+            desc = 'DouglasPeucker 1.0'
+            released = new Date()
+            vcsTag = 'v1.0.0'
+        }
+    }
 }
