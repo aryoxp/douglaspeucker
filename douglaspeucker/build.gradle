@@ -9,7 +9,7 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 1
+        versionCode 2
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -26,7 +26,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'ap.mobile.routeboxerlib:routeboxerlib:1.0.0@aar'
 }
 
 task sourcesJar(type: Jar) {
@@ -50,7 +49,7 @@ artifacts {
 }
 
 group = 'ap.mobile.douglaspeucker'
-version = '1.0.0'
+version = '1.0.1'
 
 install {
     repositories.mavenInstaller {
@@ -63,7 +62,7 @@ install {
             packaging 'aar'
             groupId 'ap.mobile.douglaspeucker'
             artifactId 'douglaspeucker'
-            version '1.0.0'
+            version '1.0.1'
 
             licenses {
                 license {
@@ -94,17 +93,17 @@ bintray {
     key = bintrayProperties.get('key')
     configurations = ['archives']
     pkg {
-        repo = 'DouglasPeucker'
-        name = 'DouglasPeucker'
+        repo = 'douglaspeucker'
+        name = 'douglaspeucker'
         userOrg = 'aryoxp'
         licenses = ['MIT']
         vcsUrl = 'https://github.com/aryoxp/douglaspeucker.git'
         publish = true
         version {
-            name = 'v1.0.0'
+            name = 'v1.0.1'
             desc = 'DouglasPeucker 1.0'
             released = new Date()
-            vcsTag = 'v1.0.0'
+            vcsTag = 'v1.0.1'
         }
     }
 }

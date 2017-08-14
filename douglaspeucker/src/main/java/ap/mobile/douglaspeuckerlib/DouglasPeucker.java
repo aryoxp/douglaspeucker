@@ -2,25 +2,23 @@ package ap.mobile.douglaspeuckerlib;
 
 import java.util.ArrayList;
 
-import ap.mobile.routeboxerlib.RouteBoxer;
-
 public class DouglasPeucker {
 
     private ArrayList<LatLng> points = new ArrayList<>();
     private double toleranceDistance = 200; // meter
     private static final double oneDegreeInMeter = 111319.9; // 1 degree in meter
 
-    public ArrayList<RouteBoxer.LatLng> simplify(ArrayList<RouteBoxer.LatLng> points, int toleranceDistance) {
+    public ArrayList<Point> simplify(ArrayList<Point> points, int toleranceDistance) {
 
         if(toleranceDistance == 0) this.toleranceDistance = 200;
         else this.toleranceDistance = toleranceDistance;
 
-        for (RouteBoxer.LatLng point : points)
+        for (Point point : points)
             this.points.add(new LatLng(point.latitude, point.longitude));
 
         this.points = this.douglasPeucker(this.points);
 
-        ArrayList<RouteBoxer.LatLng> simplifiedPoints = new ArrayList<>();
+        ArrayList<Point> simplifiedPoints = new ArrayList<>();
         simplifiedPoints.add(this.points.get(0));
         for (LatLng point :
                 this.points) {
@@ -82,7 +80,7 @@ public class DouglasPeucker {
     }
 
 
-    public class LatLng extends RouteBoxer.LatLng {
+    public class LatLng extends Point {
 
         private boolean keep = false;
 
@@ -98,4 +96,13 @@ public class DouglasPeucker {
         }
 
     }
+
+    public static class Point {
+        public double latitude, longitude;
+        public Point(double latitude, double longitude) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+    }
+
 }

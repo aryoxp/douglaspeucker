@@ -281,18 +281,18 @@ public class MapsActivity extends AppCompatActivity implements
             this.routePolyline.remove();
         this.routePolyline = this.mMap.addPolyline(polylineOptions);
 
-        ArrayList<RouteBoxer.LatLng> points = new ArrayList<>();
+        ArrayList<DouglasPeucker.Point> points = new ArrayList<>();
         for(LatLng point: route)
-            points.add(new RouteBoxer.LatLng(point.latitude, point.longitude));
+            points.add(new DouglasPeucker.Point(point.latitude, point.longitude));
 
         DouglasPeucker douglasPeucker = new DouglasPeucker();
         this.toleranceDistance = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("pref_key_tolerance_distance", "200"));
-        ArrayList<RouteBoxer.LatLng> simplifiedRoute = douglasPeucker.simplify(points, this.toleranceDistance);
+        ArrayList<DouglasPeucker.Point> simplifiedRoute = douglasPeucker.simplify(points, this.toleranceDistance);
 
         PolylineOptions simplifiedPolylineOptions = new PolylineOptions()
                 .color(Color.BLUE)
                 .width(8);
-        for(RouteBoxer.LatLng latLng : simplifiedRoute)
+        for(DouglasPeucker.Point latLng : simplifiedRoute)
             simplifiedPolylineOptions.add(new LatLng(latLng.latitude, latLng.longitude));
 
         if(this.simplifiedPolyline != null)
@@ -309,7 +309,7 @@ public class MapsActivity extends AppCompatActivity implements
         }
 
         ArrayList<LatLng> sRoute = new ArrayList<>();
-        for(RouteBoxer.LatLng point: simplifiedRoute)
+        for(DouglasPeucker.Point point: simplifiedRoute)
             sRoute.add(new LatLng(point.latitude, point.longitude));
 
         RouteBoxerTask routeBoxerTask = new RouteBoxerTask(sRoute, this.toleranceDistance, this);
